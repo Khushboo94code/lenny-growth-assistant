@@ -1,0 +1,43 @@
+# ============================================================================
+# Single-service image for Railway (or any PaaS): FastAPI serves the API AND the
+# built SPA on one port ($PORT). Pair it with a Railway Postgres that has pgvector.
+# Build context = repo root:
+#   docker build -f Dockerfile.railway -t lenny .
+# ============================================================================
+
+# ---- 1) Build the SPA with relative API URLs (same-origin behind FastAPI) ----
+FROM node:20-alpine AS web
+WORKDIR /web
+COPY frontend/package.json ./
+RUN npm install
+COPY frontend/ ./
+ENV VITE_API_URL=""
+RUN npm run build
+
+# ---- 2) Backend + bundled SPA ----------------------------------------------
+FROM python:3.12-slim
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1
+
+# git/curl/ca-certificates are used by the transcript ingestion step.
+# (No Node here: the Railway deploy uses AGENT_BACKEND=litellm, so the Agent-SDK
+# CLI is never spawned.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        git curl ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip install --no-cache-dir uv
+WORKDIR /app
+
+COPY backend/pyproject.toml ./
+COPY backend/app ./app
+COPY backend/.claude ./.claude
+COPY backend/tests ./tests
+RUN uv pip install --system --no-cache "."
+
+# Bake the built SPA so FastAPI serves it (see app/main.py: _STATIC / app/static).
+COPY --from=web /web/dist ./app/static
+
+# Railway injects $PORT; bind it (fallback 8000 for local runs).
+CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT:-8000}"]

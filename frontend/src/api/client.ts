@@ -1,6 +1,10 @@
 import type { Health, Message, ModelOption, SSEHandler, Session } from "../types";
 
-const API = (import.meta.env.VITE_API_URL as string) || "http://localhost:8000";
+// VITE_API_URL unset (e.g. `vite dev`) → talk to the backend directly on :8000.
+// VITE_API_URL="" (the built image behind nginx / Cloudflare) → same-origin relative URLs,
+// so the Cloudflare Access cookie applies to every request.
+const _envApi = import.meta.env.VITE_API_URL as string | undefined;
+const API = _envApi === undefined ? "http://localhost:8000" : _envApi;
 
 async function json<T>(path: string, init?: RequestInit): Promise<T> {
   const r = await fetch(`${API}${path}`, {

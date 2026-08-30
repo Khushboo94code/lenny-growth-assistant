@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lenny Growth Assistant — Request Access</title>
+  <meta name="description" content="Grounded, cited answers on product & growth from Lenny's Podcast. Request access to try it." />
+  <style>
+    :root {
+      --bg: #eef2f7;
+      --panel: #ffffff;
+      --ink: #1c2430;
+      --muted: #5c6a7e;
+      --line: #e2e8f0;
+      --brand: #3358d4;
+      --brand-ink: #22307a;
+      --ok: #1a7f4b;
+      --ok-bg: #e7f6ec;
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(30, 50, 90, 0.08);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; }
+    body {
+      font-family: "Segoe UI", system-ui, -apple-system, Roboto, Arial, sans-serif;
+      color: var(--ink);
+      background:
+        radial-gradient(1100px 500px at 80% -10%, #dbe4ff 0%, rgba(219,228,255,0) 60%),
+        radial-gradient(900px 500px at -10% 0%, #e6f0ff 0%, rgba(230,240,255,0) 55%),
+        var(--bg);
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+    }
+    a { color: var(--brand); }
+    .wrap { max-width: 1040px; margin: 0 auto; padding: 0 20px; }
+
+    /* Nav */
+    header.nav { padding: 20px 0; }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+    .brand { display: flex; align-items: center; gap: 10px; font-weight: 700; color: var(--brand-ink); }
+    .brand .dot { width: 26px; height: 26px; border-radius: 8px;
+      background: linear-gradient(135deg, #4577d6, #22307a); box-shadow: var(--shadow); }
+    .btn {
+      display: inline-block; border: 0; cursor: pointer; font: inherit; font-weight: 600;
+      padding: 11px 18px; border-radius: 10px; text-decoration: none; transition: transform .05s ease, box-shadow .2s ease;
+    }
+    .btn:active { transform: translateY(1px); }
+    .btn-primary { background: var(--brand); color: #fff; box-shadow: 0 6px 16px rgba(51,88,212,.25); }
+    .btn-primary:hover { box-shadow: 0 8px 22px rgba(51,88,212,.35); }
+    .btn-ghost { background: #fff; color: var(--brand-ink); border: 1px solid var(--line); }
+
+    /* Hero */
+    .hero { padding: 44px 0 24px; }
+    .eyebrow { color: var(--brand); font-weight: 700; letter-spacing: .04em; text-transform: uppercase; font-size: .8rem; }
+    .hero h1 { font-size: clamp(2rem, 4.6vw, 3.1rem); line-height: 1.1; margin: 12px 0 14px; letter-spacing: -0.02em; }
+    .hero p.lead { font-size: 1.18rem; color: var(--muted); max-width: 640px; margin: 0 0 24px; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; }
+    .pill { display: inline-flex; gap: 8px; align-items: center; color: var(--muted); font-size: .92rem;
+      background: #fff; border: 1px solid var(--line); padding: 6px 12px; border-radius: 999px; }
+
+    /* Features */
+    .section { padding: 34px 0; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .card { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius);
+      padding: 22px; box-shadow: var(--shadow); }
+    .card h3 { margin: 6px 0 6px; font-size: 1.08rem; }
+    .card p { margin: 0; color: var(--muted); font-size: .98rem; }
+    .ico { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center;
+      background: #eef3ff; color: var(--brand); font-size: 18px; }
+
+    /* Steps */
+    h2.sec-title { font-size: 1.5rem; margin: 0 0 4px; letter-spacing: -0.01em; }
+    .sec-sub { color: var(--muted); margin: 0 0 22px; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+    .step { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px; }
+    .step .n { font-weight: 800; color: var(--brand); font-size: .95rem; }
+    .step h4 { margin: 6px 0; }
+    .step p { margin: 0; color: var(--muted); font-size: .96rem; }
+
+    /* Form */
+    .apply { background: var(--panel); border: 1px solid var(--line); border-radius: 18px;
+      box-shadow: var(--shadow); padding: 30px; display: grid; grid-template-columns: 1fr 1fr; gap: 26px; }
+    .apply .intro h2 { margin: 0 0 8px; font-size: 1.5rem; }
+    .apply .intro p { color: var(--muted); margin: 0 0 12px; }
+    .apply ul { margin: 14px 0 0; padding-left: 18px; color: var(--muted); }
+    .apply li { margin: 6px 0; }
+    form .field { margin-bottom: 14px; }
+    label { display: block; font-weight: 600; font-size: .92rem; margin-bottom: 6px; }
+    .req { color: #c0392b; }
+    input, textarea {
+      width: 100%; padding: 11px 12px; border: 1px solid #cfd8e3; border-radius: 10px; font: inherit;
+      background: #fbfdff; color: var(--ink); transition: border-color .15s ease, box-shadow .15s ease;
+    }
+    input:focus, textarea:focus { outline: 0; border-color: var(--brand); box-shadow: 0 0 0 3px rgba(51,88,212,.15); }
+    textarea { resize: vertical; min-height: 96px; }
+    .submit-row { display: flex; align-items: center; gap: 12px; margin-top: 6px; }
+    button[type="submit"]:disabled { opacity: .6; cursor: not-allowed; }
+    .msg { font-size: .95rem; }
+    .msg.error { color: #b3261e; }
+    .note { color: var(--muted); font-size: .85rem; margin-top: 12px; }
+
+    /* Success */
+    .success { display: none; text-align: center; padding: 22px 6px; }
+    .success .check { width: 54px; height: 54px; border-radius: 50%; background: #e7f6ec; color: var(--ok);
+      display: grid; place-items: center; font-size: 28px; margin: 0 auto 12px; }
+    .success h3 { margin: 0 0 6px; }
+    .success p { color: var(--muted); margin: 0 auto; max-width: 420px; }
+
+    footer { color: var(--muted); font-size: .9rem; padding: 30px 0 44px; text-align: center; }
+
+    @media (max-width: 860px) {
+      .grid, .steps { grid-template-columns: 1fr; }
+      .apply { grid-template-columns: 1fr; padding: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="nav">
+      <div class="nav-inner">
+        <div class="brand"><span class="dot" aria-hidden="true"></span> Lenny Growth Assistant</div>
+        <a class="btn btn-ghost" href="/">Log in</a>
+      </div>
+    </header>
+
+    <section class="hero">
+      <div class="eyebrow">Product &amp; growth, grounded in Lenny's Podcast</div>
+      <h1>Answers you can trust — with the receipts.</h1>
+      <p class="lead">
+        Ask real product &amp; growth questions and get concise answers grounded in Lenny's Podcast
+        transcripts, each one cited back to the episode it came from. Turn any answer into a
+        Ship-30 essay or a one-page artifact. Access is invite-only — request yours below.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="#request">Request access</a>
+        <a class="btn btn-ghost" href="/">I'm already approved</a>
+      </div>
+      <div style="margin-top:16px; display:flex; gap:10px; flex-wrap:wrap;">
+        <span class="pill">✓ Grounded &amp; cited</span>
+        <span class="pill">✓ Honest when it doesn't know</span>
+        <span class="pill">✓ Private by design</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="grid">
+        <div class="card">
+          <div class="ico">◆</div>
+          <h3>Grounded RAG chat</h3>
+          <p>Every answer is retrieved from the transcripts and cited. Out-of-scope question? It says so instead of making things up.</p>
+        </div>
+        <div class="card">
+          <div class="ico">✎</div>
+          <h3>Ship-30 essays</h3>
+          <p>Turn a grounded answer into a ~1,250-word essay — strong hook, skimmable structure, concrete takeaway.</p>
+        </div>
+        <div class="card">
+          <div class="ico">▤</div>
+          <h3>Safe artifacts</h3>
+          <p>Generate a one-page HTML or Markdown summary, rendered in a sandboxed viewer with a security panel.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="how">
+      <h2 class="sec-title">How access works</h2>
+      <p class="sec-sub">Invite-only, approved one person at a time.</p>
+      <div class="steps">
+        <div class="step">
+          <div class="n">STEP 1</div>
+          <h4>Request access</h4>
+          <p>Tell us who you are and how you'd use it. Takes 30 seconds.</p>
+        </div>
+        <div class="step">
+          <div class="n">STEP 2</div>
+          <h4>We review</h4>
+          <p>The owner reviews your request and approves your email address.</p>
+        </div>
+        <div class="step">
+          <div class="n">STEP 3</div>
+          <h4>You're in</h4>
+          <p>Open the app, sign in with a one-time code sent to your email, and start asking.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="request">
+      <div class="apply">
+        <div class="intro">
+          <h2>Request access</h2>
+          <p>Ask to be added to the approved list. We'll notify you at this email once you're in.</p>
+          <ul>
+            <li>Use the email you'll actually sign in with.</li>
+            <li>Approval is manual — usually quick.</li>
+            <li>No password to create; login is a one-time email code.</li>
+          </ul>
+        </div>
+
+        <div>
+          <form id="request-form" novalidate>
+            <div class="field">
+              <label for="name">Name</label>
+              <input id="name" name="name" type="text" autocomplete="name" placeholder="Ada Lovelace" maxlength="120" />
+            </div>
+            <div class="field">
+              <label for="email">Work email <span class="req">*</span></label>
+              <input id="email" name="email" type="email" autocomplete="email" placeholder="you@company.com" required maxlength="254" />
+            </div>
+            <div class="field">
+              <label for="reason">How will you use it?</label>
+              <textarea id="reason" name="reason" placeholder="e.g. PM at a Series A — researching onboarding & activation loops." maxlength="1000"></textarea>
+            </div>
+            <div class="submit-row">
+              <button class="btn btn-primary" type="submit" id="submit-btn">Request access</button>
+              <span class="msg" id="form-msg" role="status" aria-live="polite"></span>
+            </div>
+            <p class="note">By requesting access you agree this is an internal/educational demo. Your details are used only to grant access.</p>
+          </form>
+
+          <div class="success" id="success">
+            <div class="check" aria-hidden="true">✓</div>
+            <h3>Request received</h3>
+            <p id="success-text">Thanks! Your request is in. You'll get an email once you're approved — then head to the app and sign in.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer>
+      Lenny Growth Assistant · grounded, cited, invite-only. Content belongs to Lenny's Podcast and guests.
+    </footer>
+  </div>
+
+  <script>
+    (function () {
+      var form = document.getElementById("request-form");
+      var msg = document.getElementById("form-msg");
+      var btn = document.getElementById("submit-btn");
+      var success = document.getElementById("success");
+      var successText = document.getElementById("success-text");
+
+      function setMsg(text, isError) {
+        msg.textContent = text || "";
+        msg.className = "msg" + (isError ? " error" : "");
+      }
+
+      form.addEventListener("submit", async function (e) {
+        e.preventDefault();
+        setMsg("");
+        var name = document.getElementById("name").value.trim();
+        var email = document.getElementById("email").value.trim();
+        var reason = document.getElementById("reason").value.trim();
+
+        if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+          setMsg("Please enter a valid email address.", true);
+          return;
+        }
+
+        btn.disabled = true;
+        var original = btn.textContent;
+        btn.textContent = "Sending…";
+        try {
+          var resp = await fetch("/request-access", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ name: name, email: email, reason: reason }),
+          });
+          if (resp.ok) {
+            form.style.display = "none";
+            successText.textContent =
+              "Thanks, " + (name || "there") + "! Your request is in for " + email +
+              ". You'll get an email once you're approved — then open the app and sign in.";
+            success.style.display = "block";
+            return;
+          }
+          if (resp.status === 429) {
+            setMsg("You've sent a few requests already — please try again a bit later.", true);
+          } else if (resp.status === 422) {
+            setMsg("Please check your details and try again.", true);
+          } else {
+            setMsg("Something went wrong (" + resp.status + "). Please try again.", true);
+          }
+        } catch (err) {
+          setMsg("Network error — please check your connection and try again.", true);
+        } finally {
+          btn.disabled = false;
+          btn.textContent = original;
+        }
+      });
+    })();
+  </script>
+</body>
+</html>

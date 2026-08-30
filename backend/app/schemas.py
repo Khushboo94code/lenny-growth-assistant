@@ -1,11 +1,14 @@
 """Request/response contracts (validation + clear API shapes)."""
 from __future__ import annotations
 
+import re
 from datetime import date, datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 # ---- sessions --------------------------------------------------------------
@@ -54,6 +57,31 @@ class MessageOut(BaseModel):
 class ChatRequest(BaseModel):
     session_id: UUID
     message: str = Field(min_length=1, max_length=8000)
+
+
+# ---- access requests -------------------------------------------------------
+class AccessRequestCreate(BaseModel):
+    name: str = Field(default="", max_length=120)
+    email: str = Field(min_length=3, max_length=254)
+    reason: str = Field(default="", max_length=1000)
+
+    @field_validator("email")
+    @classmethod
+    def _normalize_email(cls, v: str) -> str:
+        v = v.strip().lower()
+        if not _EMAIL_RE.match(v):
+            raise ValueError("Enter a valid email address.")
+        return v
+
+
+class AccessRequestOut(BaseModel):
+    id: UUID
+    name: str
+    email: str
+    reason: str
+    status: str
+    created_at: datetime
+    updated_at: datetime
 
 
 # ---- health ----------------------------------------------------------------

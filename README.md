@@ -69,6 +69,82 @@ open http://localhost:8080      # API docs at http://localhost:8000/docs
 
 `make` shortcuts: `make up`, `make ingest`, `make test`, `make logs`, `make down`.
 
+## Run natively (without Docker)
+
+Prefer the Docker path above for a clean one-command start. To run everything on the host
+instead (faster iteration), here's the macOS / Homebrew path.
+
+**Prerequisites:** `uv`, Node 20+, PostgreSQL 16 + pgvector, and Ollama.
+
+**1. Postgres + pgvector (one time)**
+```bash
+brew install postgresql@16 pgvector
+brew services start postgresql@16
+
+# role + database the app expects (ignore "already exists")
+psql postgres -c "CREATE ROLE lenny LOGIN SUPERUSER PASSWORD 'lenny';"
+createdb -O lenny lenny
+```
+If `CREATE EXTENSION vector` later errors with *"extension 'vector' is not available"*, Homebrew
+built pgvector for a different Postgres major version. Build it against PG16 explicitly:
+```bash
+git clone --branch v0.8.0 https://github.com/pgvector/pgvector.git /tmp/pgvector
+make -C /tmp/pgvector install PG_CONFIG=/opt/homebrew/opt/postgresql@16/bin/pg_config
+```
+
+**2. Ollama + models (one time)**
+```bash
+brew install ollama
+brew services start ollama
+ollama pull llama3.1:8b        # local chat model
+ollama pull nomic-embed-text   # embeddings — used for retrieval in BOTH cloud and local modes
+```
+
+**3. Backend config** — create `backend/.env` (git-ignored) with localhost hosts:
+```dotenv
+APP_ENV=local
+LLM_PROVIDER=local            # or "cloud" (needs OPENAI_API_KEY below)
+AGENT_BACKEND=litellm         # direct path; no LiteLLM proxy needed natively
+OPENAI_API_KEY=               # only required for cloud
+OPENAI_MODEL=gpt-4o-mini
+OLLAMA_URL=http://localhost:11434
+OLLAMA_MODEL=llama3.1:8b
+EMBED_MODEL=nomic-embed-text
+EMBED_DIM=768
+DATABASE_URL=postgresql://lenny:lenny@localhost:5432/lenny
+```
+
+**4. Load the knowledge base (once)**
+```bash
+cd backend
+uv run --python 3.12 python -m app.rag.ingest   # clones transcripts, embeds ~50 episodes
+```
+> Run ingest **once, not concurrently** — it truncates + reloads the table, so two parallel runs
+> clobber each other.
+
+**5. Run the two servers**
+```bash
+# Terminal 1 — API
+cd backend && uv run --python 3.12 uvicorn app.main:app --reload --port 8000
+
+# Terminal 2 — web (Vite may pick 5173/5174/… — CORS allows any localhost port in local dev)
+cd frontend && npm install && npm run dev
+```
+Open the printed URL (e.g. http://localhost:5173). Verify the API:
+```bash
+curl -s localhost:8000/health   # "status":"ok" with checks.db.chunks > 0
+```
+
+**Notes**
+- `AGENT_BACKEND=litellm` is the simplest native path (no proxy). To exercise the Claude Agent SDK
+  path, set `AGENT_BACKEND=agent_sdk` and run the proxy in a third terminal:
+  `uv run --python 3.12 litellm --config ../litellm/config.yaml --port 4000`.
+- **Keep Ollama running even in cloud mode** — embeddings always use `nomic-embed-text` locally, so
+  retrieval needs it regardless of the chat provider.
+- Switch models live from the **header dropdown** (no restart), or set `LLM_PROVIDER` in
+  `backend/.env` and restart the API.
+- `uv` will fetch Python 3.12 automatically; if not, run `uv python install 3.12`.
+
 ## Switching to the cloud model (OpenAI)
 
 In `.env`:

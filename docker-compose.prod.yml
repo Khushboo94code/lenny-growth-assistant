@@ -1,0 +1,46 @@
+# ============================================================================
+# Production overlay — run behind a Cloudflare Tunnel with Cloudflare Access.
+# Nothing is published to the host; the ONLY ingress is:
+#     cloudflared ──> web (nginx) ──> api ──> OpenAI / Ollama(embeddings) / db
+#
+# On the deployment host:
+#   cp .env.prod.example .env         # then fill OPENAI_API_KEY, TUNNEL_TOKEN, POSTGRES_PASSWORD
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+#   # one-time knowledge-base load:
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml run --rm api python -m app.rag.ingest
+#
+# Requires Docker Compose v2.24+ (for the `!reset` tag that clears published ports).
+# ============================================================================
+services:
+  # Stop publishing internal services to the host — reachable only on the compose network.
+  db:
+    ports: !reset []
+  ollama:
+    ports: !reset []
+  litellm:
+    ports: !reset []
+  api:
+    ports: !reset []
+  web:
+    ports: !reset []
+
+  # Cloud mode needs only the embedding model locally; skip the ~4.7GB chat model pull.
+  ollama-pull:
+    command:
+      - >
+        echo 'Waiting for ollama...' &&
+        until ollama list >/dev/null 2>&1; do sleep 2; done &&
+        ollama pull ${EMBED_MODEL:-nomic-embed-text} &&
+        echo 'Embedding model ready.'
+
+  # Cloudflare Tunnel: publishes the app on your Cloudflare hostname with no open ports.
+  # Create the tunnel in Zero Trust > Networks > Tunnels, route the public hostname to
+  # http://web:80, and paste the tunnel token into .env as TUNNEL_TOKEN.
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:?set TUNNEL_TOKEN in your .env}
+    depends_on:
+      - web

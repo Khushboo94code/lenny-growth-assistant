@@ -1,0 +1,26 @@
+# Keep the build context small & clean (esp. for Dockerfile.railway).
+**/.venv
+**/venv
+**/node_modules
+**/dist
+**/.vite
+**/__pycache__
+**/*.py[cod]
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+**/*.egg-info
+data/
+pgdata/
+ollama/
+.git
+.github
+**/.DS_Store
+**/*.log
+# Never ship env files into an image
+.env
+.env.*
+*.env
+!.env.example
+!.env.prod.example
+agent-transcripts/

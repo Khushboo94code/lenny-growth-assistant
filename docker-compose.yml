@@ -96,7 +96,9 @@ services:
     build:
       context: ./frontend
       args:
-        VITE_API_URL: http://localhost:8000
+        # Empty → the SPA uses same-origin relative URLs and nginx reverse-proxies
+        # the API paths to the api service (works both locally and behind Cloudflare).
+        VITE_API_URL: ""
     depends_on:
       - api
     ports:

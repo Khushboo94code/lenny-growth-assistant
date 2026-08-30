@@ -53,6 +53,20 @@ def _schema_sql(dim: int) -> str:
     CREATE INDEX IF NOT EXISTS idx_chunks_hnsw
         ON transcript_chunks USING hnsw (embedding vector_cosine_ops);
     CREATE INDEX IF NOT EXISTS idx_chunks_episode ON transcript_chunks(episode_id);
+
+    -- Access requests: people who ask (from the public /welcome page) to be
+    -- approved. Approval itself is granted in Cloudflare Access; this is the queue.
+    CREATE TABLE IF NOT EXISTS access_requests (
+        id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+        name        TEXT NOT NULL DEFAULT '',
+        email       TEXT NOT NULL,
+        reason      TEXT NOT NULL DEFAULT '',
+        status      TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending','approved','denied')),
+        created_at  TIMESTAMPTZ NOT NULL DEFAULT now(),
+        updated_at  TIMESTAMPTZ NOT NULL DEFAULT now()
+    );
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_access_requests_email
+        ON access_requests (lower(email));
     """
 
 

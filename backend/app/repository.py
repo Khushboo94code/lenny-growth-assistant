@@ -178,6 +178,51 @@ async def count_chunks() -> int:
             return int(row[0]) if row else 0
 
 
+# ---- access requests -------------------------------------------------------
+async def create_access_request(name: str, email: str, reason: str) -> dict:
+    """Upsert keyed on lower(email): re-submitting updates the details and timestamp
+    but never downgrades a request that's already been approved/denied."""
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "INSERT INTO access_requests (name, email, reason) VALUES (%s, %s, %s) "
+                "ON CONFLICT (lower(email)) DO UPDATE "
+                "SET name = EXCLUDED.name, reason = EXCLUDED.reason, updated_at = now() "
+                "RETURNING id, name, email, reason, status, created_at, updated_at",
+                (name, email, reason),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+    return row
+
+
+async def list_access_requests() -> list[dict]:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "SELECT id, name, email, reason, status, created_at, updated_at "
+                "FROM access_requests ORDER BY "
+                "CASE status WHEN 'pending' THEN 0 WHEN 'approved' THEN 1 ELSE 2 END, created_at DESC"
+            )
+            return await cur.fetchall()
+
+
+async def set_access_request_status(request_id: UUID, status: str) -> dict | None:
+    pool = await get_pool()
+    async with pool.connection() as conn:
+        async with conn.cursor(row_factory=dict_row) as cur:
+            await cur.execute(
+                "UPDATE access_requests SET status = %s, updated_at = now() WHERE id = %s "
+                "RETURNING id, name, email, reason, status, created_at, updated_at",
+                (status, request_id),
+            )
+            row = await cur.fetchone()
+        await conn.commit()
+    return row
+
+
 async def ping() -> bool:
     pool = await get_pool()
     async with pool.connection() as conn:

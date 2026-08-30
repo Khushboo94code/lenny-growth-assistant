@@ -37,10 +37,16 @@ async def _check_url(url: str) -> dict:
 async def health() -> HealthOut:
     s = get_settings()
     db = await _check_db()
-    ollama = await _check_url(f"{s.ollama_url}/api/tags")
-    litellm = await _check_url(f"{s.litellm_proxy_url}/health/liveliness")
+    checks: dict = {"db": db}
 
-    checks = {"db": db, "ollama": ollama, "litellm": litellm}
+    # Only probe services this deployment actually uses, so a pure-cloud deploy
+    # (OpenAI chat + OpenAI embeddings) doesn't report phantom failures or eat the
+    # health latency on unreachable URLs.
+    if s.embed_provider.lower() == "ollama" or not s.is_cloud:
+        checks["ollama"] = await _check_url(f"{s.ollama_url}/api/tags")
+    if s.agent_backend == "agent_sdk":
+        checks["litellm"] = await _check_url(f"{s.litellm_proxy_url}/health/liveliness")
+
     provider, model = gateway.active_labels()  # reflects live selection + fallback
     return HealthOut(
         status="ok" if db.get("ok") else "degraded",

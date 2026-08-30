@@ -6,6 +6,7 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from .. import runtime
+from ..config import get_settings
 
 router = APIRouter(prefix="/config", tags=["config"])
 
@@ -22,6 +23,10 @@ async def list_models() -> dict:
 
 @router.post("/model")
 async def set_model(body: ModelSelection) -> dict:
+    # In a deployed environment the provider/model are fixed by config; don't let
+    # visitors switch to a costlier model (or a broken provider) and burn quota.
+    if get_settings().app_env != "local":
+        raise HTTPException(status_code=403, detail="Model switching is disabled in this deployment.")
     try:
         runtime.set_selection(body.provider, body.model)
     except ValueError as exc:

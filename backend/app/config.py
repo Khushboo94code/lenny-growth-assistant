@@ -27,7 +27,12 @@ class Settings(BaseSettings):
     ollama_url: str = "http://ollama:11434"
     ollama_model: str = "llama3.1:8b"
 
-    # Embeddings (fixed across providers -> one vector space)
+    # Embeddings. `embed_provider` picks where they run:
+    #   ollama -> nomic-embed-text (768 dims), fully local, no key
+    #   openai -> text-embedding-3-small (1536 dims), pure-cloud, no Ollama needed
+    # The dim is fixed per deployment (it defines the pgvector column), so switching
+    # providers requires a matching embed_dim + a fresh ingest.
+    embed_provider: str = "ollama"   # ollama | openai
     embed_model: str = "nomic-embed-text"
     embed_dim: int = 768
 
@@ -45,6 +50,9 @@ class Settings(BaseSettings):
     # Ingestion
     transcripts_repo: str = "https://github.com/ChatPRD/lennys-podcast-transcripts.git"
     ingest_max_episodes: int = 50
+    # If true, populate the knowledge base on startup when it's empty (handy on a
+    # PaaS like Railway where running a one-off ingest command is awkward).
+    auto_ingest: bool = False
 
     # ---- derived helpers ----------------------------------------------------
     @property
