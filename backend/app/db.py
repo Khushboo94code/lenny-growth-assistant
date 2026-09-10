@@ -83,7 +83,6 @@ async def init_db() -> None:
 async def get_pool() -> AsyncConnectionPool:
     global _pool
     if _pool is None:
-        s = get_settings()
         _pool = AsyncConnectionPool(conninfo=s.database_url, min_size=1, max_size=10, open=False)
         await _pool.open(wait=True, timeout=30)
     return _pool
